@@ -3,8 +3,8 @@ from numpy import *
 from test import dist_eclud
 
 
-# 最大最小距离算法(t表示比例系数，默认为0.5)
-def mm_dist(data_set, t=0.5):
+# 最大最小距离算法(theta表示比例系数，默认为0.5)
+def mm_dist(data_set, theta=0.5):
     # 选取第一个样本为聚类中心
     centroids = []
     centroids.append(data_set[0])
@@ -21,11 +21,11 @@ def mm_dist(data_set, t=0.5):
         # 计算其余各点到聚类中心的最小距离
         min_dists = []
         for vec in data_set:
-            min_dists.append(vec, centroids)
+            min_dists.append(min_to_centroids(vec, centroids))
 
         # 判断最大距离
         max_min_dist = max(min_dists)
-        if max_min_dist > t * first_to_second:
+        if max_min_dist > theta * first_to_second:
             centroids.append(data_set[[i for i, x in enumerate(min_dists) if x == max_min_dist]])
         else:
             print("得到的聚类中心为：", centroids)

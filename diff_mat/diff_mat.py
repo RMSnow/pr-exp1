@@ -38,6 +38,12 @@ def get_tag(attr):
         return 0
 
 
+# 处理序数属性(1-8)
+def sequence_to_value(sequence):
+    sequence_max = 8.0
+    return (float(sequence) - 1.0) / (sequence_max - 1.0)
+
+
 # 计算混合类型的差异性矩阵
 def cal_diff_mat(data_list):
     n = len(data_list) - 1  # 共有n个对象
@@ -47,40 +53,70 @@ def cal_diff_mat(data_list):
     diff_mat = mat(zeros((n, n)))  # 生成n阶方阵
     attr_tag = data_list[0]  # 属性的标识符
 
+    # 处理序数属性与数值属性
+    value_attr_dict = {}
+    for f in range(p):
+        if attr_tag[f] == 2 or attr_tag[f] == 3:
+            data_list_f = []
+            max_key = '%d%s' % (f, '_max')
+            min_key = '%d%s' % (f, '_min')
+
+            if attr_tag[f] == 2:  # 序数属性
+                for k in range(1, n + 1):
+                    data_list[k][f] = sequence_to_value(data_list[k][f])
+                    data_list_f.append(data_list[k][f])
+
+            if attr_tag[f] == 3:  # 数值属性
+                for k in range(1, n + 1):
+                    data_list_f.append(float(data_list[k][f]))
+
+            value_attr_dict[max_key] = max(data_list_f)
+            value_attr_dict[min_key] = min(data_list_f)
+
     # 对矩阵的行进行遍历
     for i in range(n):
         # 对矩阵的列进行遍历
         for j in range(i):
             indicator = []  # 指示符
             d_i_j = []  # 相异性贡献
+            sum_number = 0.0
+            sum_fraction = 0.0
+
             # 对每个属性进行遍历
             for f in range(p):
                 indicator_f = 1
                 d_i_j_f = 0
-                x_i_f = data_list[i+1][f]
-                x_j_f = data_list[j+1][f]
+                x_i_f = data_list[i + 1][f]
+                x_j_f = data_list[j + 1][f]
 
                 if attr_tag[f] == 1:  # 标称属性
                     if x_i_f == x_j_f:
                         d_i_j_f = 0
                     else:
                         d_i_j_f = 1
-                elif attr_tag[f] == 2:  # 序数属性-------------------------
-                    pass
-                elif attr_tag[f] == 3:  # 数值属性
-                    pass
+                elif attr_tag[f] == 2 or attr_tag[f] == 3:  # 处理后的序数属性／数值属性
+                    max_key = '%d%s' % (f, '_max')
+                    min_key = '%d%s' % (f, '_min')
+                    max_f = value_attr_dict[max_key]
+                    min_f = value_attr_dict[min_key]
+                    d_i_j_f = abs(float(x_i_f) - float(x_j_f)) / (max_f - min_f)
                 elif attr_tag[f] == 4:  # 非对称的二元属性
                     if x_i_f == x_j_f:
                         if x_j_f == 0:
                             indicator_f = 0
                     else:
                         d_i_j_f = 1
-                else:
-                    pass
 
                 indicator.append(indicator_f)
                 d_i_j.append(d_i_j_f)
 
+                sum_number += indicator_f * d_i_j_f
+                sum_fraction += indicator_f
+
+            diff_mat[i, j] = sum_number / sum_fraction
+
+    print("处理后得到的矩阵如下：")
+    print(diff_mat)
     return diff_mat
 
 

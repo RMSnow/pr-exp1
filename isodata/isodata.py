@@ -1,38 +1,58 @@
 # encoding:utf-8
 from numpy import *
-from k_means.k_means import rand_cent
-from test import dist_eclud
 from isodata.Cluster import Cluster
 
 
-# 参数说明：
-# （1）exp_clusters：希望的聚类中心数目
-# （2）theta_n：每个聚类中最少的样本数（判断是否可以作为独立的聚类）
-# （3）theta_s：聚类域中样本的标准差阈值（判断是否要分裂）
-# （4）theta_c：两聚类中心之间的最短距离（判断是否要合并）
-# （5）comb_l：在一次迭代中允许合并的聚类中心的最大对数
-# （6）max_its：允许迭代的次数
+# 构建一个包含k个随机质心的集合
+def rand_cent(data_mat, k):
+    n = shape(data_mat)[1]
+    centroids = mat(zeros((k, n)))
+    for j in range(n):
+        min_j = min(data_mat[:, j])
+        range_j = float(max(data_mat[:, j]) - min_j)
+        centroids[:, j] = mat(min_j + range_j * random.rand(k, 1))
+    return centroids
+
+
+# 计算欧拉距离
+def dist_eclud(vec_a, vec_b):
+    return sqrt(sum(power(vec_a - vec_b, 2)))
 
 
 # 迭代自组织算法
-def isodata(data_set, init_clusters=5, exp_clusters=3, theta_n=3, theta_s=0.5, theta_c=2, comb_l=2, max_its=5):
+def isodata(data_mat, init_clusters=5, exp_clusters=3, theta_n=5, theta_s=0.5, theta_c=2, comb_l=1, max_its=5):
+    # 参数说明：
+    # （1）exp_clusters：希望的聚类中心数目
+    # （2）theta_n：每个聚类中最少的样本数（判断是否可以作为独立的聚类）
+    # （3）theta_s：聚类域中样本的标准差阈值（判断是否要分裂）
+    # （4）theta_c：两聚类中心之间的最短距离（判断是否要合并）
+    # （5）comb_l：在一次迭代中允许合并的聚类中心的最大对数
+    # （6）max_its：允许迭代的次数
+
     # Step1：从数据集中随机选取clusters个样本作为初始中心
-    centroids = rand_cent(data_set, init_clusters)
+    centroids = rand_cent(data_mat, init_clusters)
     clusters = []
     for centroid in centroids:
         cluster = Cluster(centroid)
         clusters.append(cluster)
 
     its = 0
-    while (its <= max_its):
+    while its <= max_its:
         cluster_flag = False
-        while (cluster_flag == False):
+        while not cluster_flag:
             # Step2：对每个样本，按照最小距离分至其所属的聚类中心
-            for vec in data_set:
+            for vec in data_mat:
                 dists = []
                 for cluster in clusters:
                     dists.append(dist_eclud(vec, cluster.centroid))
-                clusters[[i for i, x in enumerate(dists) if x == min(dists)]].add_vec(vec)
+                # clusters[[i for i, x in enumerate(dists) if x == min(dists)]].add_vec(vec)
+                min_index = 0
+                for dist in dists:
+                    if dists[min_index] == min(dists):
+                        break
+                    else:
+                        min_index += 1
+                clusters[min_index].add_vec(vec)
 
             # Step3：根据theta_n进行判断是否需丢弃某类
             for cluster in clusters:
@@ -40,7 +60,7 @@ def isodata(data_set, init_clusters=5, exp_clusters=3, theta_n=3, theta_s=0.5, t
                     clusters.remove(cluster)
                 else:
                     if cluster == clusters[-1]:
-                        cluster_flag == True
+                        cluster_flag = True
 
         # Step4：针对每个类，重新计算其聚类中心（属于该类所有样本的质心）
         for cluster in clusters:
@@ -55,8 +75,7 @@ def isodata(data_set, init_clusters=5, exp_clusters=3, theta_n=3, theta_s=0.5, t
 
         # Step7：如果到达最大迭代次数则终止，否则返回Step2
         its += 1
-
-    return
+    return centroids, clusters
 
 
 # 合并操作
@@ -107,3 +126,10 @@ def divide(clusters, theta_s, theta_n):
             continue
 
     return clusters
+
+
+# 主流程
+def show_isodata(data_mat):
+    num_samples, dim = data_mat.shape
+    centroids, clusters = isodata(data_mat)
+    return

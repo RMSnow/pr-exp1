@@ -115,8 +115,9 @@ def cal_diff_mat(data_list):
 
             diff_mat[i, j] = sum_number / sum_fraction
 
-    print("处理后得到的矩阵如下：")
+    print("得到的差异性矩阵如下：")
     print(diff_mat)
+    print()
     return diff_mat
 
 

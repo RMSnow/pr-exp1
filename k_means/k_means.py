@@ -43,7 +43,7 @@ def k_means(data_mat, k, dist_meas=dist_eclud, create_cent=rand_cent):
 
 
 # 主流程
-def show_k_means(data_mat, k=3):
+def show_k_means(data_mat, k=5):
     num_samples, dim = data_mat.shape
     centroids, cluster_assignment = k_means(data_mat, k)
     mark = ['or', 'ob', 'og', 'ok', '^r', '+r', 'sr', 'dr', '<r', 'pr']

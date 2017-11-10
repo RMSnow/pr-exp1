@@ -68,7 +68,7 @@ def agnes(data_set, dist_meas, k):
 
 
 # 主流程
-def show_agnes(data_set, k=3):
+def show_agnes(data_set, k=5):
     c = agnes(data_set, dist_avg, k)
     col_value = ['r', 'y', 'g', 'b', 'c', 'k', 'm']
     for i in range(len(c)):

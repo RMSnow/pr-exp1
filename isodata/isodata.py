@@ -3,6 +3,14 @@ from numpy import *
 from isodata.Cluster import Cluster
 
 
+# 参数说明：
+#     （1）exp_clusters：希望的聚类中心数目
+#     （2）theta_n：每个聚类中最少的样本数（判断是否可以作为独立的聚类）
+#     （3）theta_s：聚类域中样本的标准差阈值（判断是否要分裂）
+#     （4）theta_c：两聚类中心之间的最短距离（判断是否要合并）
+#     （5）comb_l：在一次迭代中允许合并的聚类中心的最大对数
+#     （6）max_its：允许迭代的次数
+
 # 构建一个包含k个随机质心的集合
 def rand_cent(data_mat, k):
     n = shape(data_mat)[1]
@@ -21,14 +29,6 @@ def dist_eclud(vec_a, vec_b):
 
 # 迭代自组织算法
 def isodata(data_mat, init_clusters=5, exp_clusters=3, theta_n=5, theta_s=0.5, theta_c=2, comb_l=1, max_its=5):
-    # 参数说明：
-    # （1）exp_clusters：希望的聚类中心数目
-    # （2）theta_n：每个聚类中最少的样本数（判断是否可以作为独立的聚类）
-    # （3）theta_s：聚类域中样本的标准差阈值（判断是否要分裂）
-    # （4）theta_c：两聚类中心之间的最短距离（判断是否要合并）
-    # （5）comb_l：在一次迭代中允许合并的聚类中心的最大对数
-    # （6）max_its：允许迭代的次数
-
     # Step1：从数据集中随机选取clusters个样本作为初始中心
     centroids = rand_cent(data_mat, init_clusters)
     clusters = []
